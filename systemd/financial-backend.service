@@ -1,0 +1,41 @@
+[Unit]
+Description=Financial Calculators Backend (FastAPI)
+After=network.target
+Documentation=https://github.com/yourusername/financial-calculators
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/financial-calculators/backend
+Environment="PATH=/var/www/financial-calculators/backend/venv/bin"
+Environment="PYTHONUNBUFFERED=1"
+Environment="ENVIRONMENT=production"
+
+# Start command
+ExecStart=/var/www/financial-calculators/backend/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4
+
+# Restart policy
+Restart=always
+RestartSec=10
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/financial-calculators/backend/logs
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=financial-backend
+
+[Install]
+WantedBy=multi-user.target
