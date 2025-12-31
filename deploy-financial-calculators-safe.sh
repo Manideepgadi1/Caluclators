@@ -31,11 +31,16 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# Check if the app directory exists
+# Clone from GitHub if directory doesn't exist
 if [ ! -d "$APP_DIR" ]; then
-    echo -e "${RED}❌ Application directory not found: $APP_DIR${NC}"
-    echo "Please upload your Financial Calculators code to $APP_DIR first"
-    exit 1
+    echo -e "${YELLOW}📥 Cloning Financial Calculators from GitHub...${NC}"
+    cd /var/www/vsfintech
+    git clone https://github.com/Manideepgadi1/Caluclators.git Investment-Calculator
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ Failed to clone from GitHub${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Repository cloned successfully${NC}"
 fi
 
 echo -e "${YELLOW}📋 Checking prerequisites...${NC}"
