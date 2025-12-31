@@ -34,6 +34,7 @@ fi
 # Clone from GitHub if directory doesn't exist
 if [ ! -d "$APP_DIR" ]; then
     echo -e "${YELLOW}📥 Cloning Financial Calculators from GitHub...${NC}"
+    mkdir -p /var/www/vsfintech
     cd /var/www/vsfintech
     git clone https://github.com/Manideepgadi1/Caluclators.git Investment-Calculator
     if [ $? -ne 0 ]; then
@@ -41,8 +42,14 @@ if [ ! -d "$APP_DIR" ]; then
         exit 1
     fi
     echo -e "${GREEN}✓ Repository cloned successfully${NC}"
+else
+    echo -e "${YELLOW}📥 Updating existing repository...${NC}"
+    cd "$APP_DIR"
+    git pull origin main
+    echo -e "${GREEN}✓ Repository updated${NC}"
 fi
 
+echo ""
 echo -e "${YELLOW}📋 Checking prerequisites...${NC}"
 
 # Check for Next.js frontend
