@@ -24,7 +24,7 @@ const NumberInput: React.FC<NumberInputProps> = ({
   suffix = '',
   showButtons = true,
 }) => {
-  const [inputValue, setInputValue] = React.useState(displayValue);
+  const [inputValue, setInputValue] = React.useState('');
 
   React.useEffect(() => {
     const formatted = prefix === '₹' 
@@ -73,6 +73,9 @@ const NumberInput: React.FC<NumberInputProps> = ({
             onChange={handleInputChange}
             onBlur={handleBlur}
             onKeyPress={handleKeyPress}
+            title={label}
+            placeholder="Enter value"
+            aria-label={label}
             className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             style={{ paddingLeft: prefix ? '2rem' : '1rem' }}
           />
