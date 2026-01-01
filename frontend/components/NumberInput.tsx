@@ -24,10 +24,30 @@ const NumberInput: React.FC<NumberInputProps> = ({
   suffix = '',
   showButtons = true,
 }) => {
+  const [inputValue, setInputValue] = React.useState(displayValue);
+
+  React.useEffect(() => {
+    const formatted = prefix === '₹' 
+      ? formatCurrency(value, 0).replace('₹', '')
+      : value.toLocaleString('en-IN');
+    setInputValue(formatted);
+  }, [value, prefix]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const inputValue = e.target.value.replace(/[₹,\s]/g, '');
-    const numValue = parseFloat(inputValue) || 0;
+    const rawValue = e.target.value;
+    setInputValue(rawValue);
+  };
+
+  const handleBlur = () => {
+    const cleanValue = inputValue.replace(/[₹,\s]/g, '');
+    const numValue = parseFloat(cleanValue) || 0;
     onChange(clamp(numValue, min, max));
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleBlur();
+    }
   };
 
   const handleIncrement = () => {
@@ -40,10 +60,6 @@ const NumberInput: React.FC<NumberInputProps> = ({
     onChange(newValue);
   };
 
-  const displayValue = prefix === '₹' 
-    ? formatCurrency(value, 0).replace('₹', '')
-    : value.toLocaleString('en-IN');
-
   return (
     <div className="mb-4">
       <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -53,8 +69,10 @@ const NumberInput: React.FC<NumberInputProps> = ({
         <div className="flex-1 relative">
           <input
             type="text"
-            value={displayValue}
+            value={inputValue}
             onChange={handleInputChange}
+            onBlur={handleBlur}
+            onKeyPress={handleKeyPress}
             className="w-full px-4 py-2.5 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             style={{ paddingLeft: prefix ? '2rem' : '1rem' }}
           />
