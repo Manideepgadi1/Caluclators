@@ -51,6 +51,13 @@ if [ $? -ne 0 ]; then
 fi
 echo -e "${GREEN}✓ Code updated${NC}"
 
+# Rebuild frontend (Next.js)
+echo ""
+echo -e "${YELLOW}→ Building frontend (Next.js)...${NC}"
+cd "$APP_DIR/frontend"
+npm run build
+echo -e "${GREEN}✓ Frontend built${NC}"
+
 # Restart backend (uvicorn)
 echo ""
 echo -e "${YELLOW}→ Restarting backend (uvicorn)...${NC}"
