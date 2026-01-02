@@ -19,6 +19,9 @@ export interface RetirementInput {
   inflation?: number;
   growth_in_savings?: number;
   existing_investments?: number;
+  life_expectancy?: number;
+  retirement_kitty_returns?: number;
+  post_retirement_inflation?: number;
 }
 
 export interface RetirementOutput {

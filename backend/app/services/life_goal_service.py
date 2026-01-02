@@ -31,17 +31,32 @@ class RetirementCalculator:
         # Calculate inflation-adjusted monthly expenses at retirement
         monthly_expenses_retirement = data.monthly_expenses * pow(1 + data.inflation / 100, years_remaining)
         
-        # Calculate required retirement corpus
-        # Assume 8% post-retirement returns (conservative)
-        post_retirement_return = min(data.expected_returns, 8.0)
+        # Calculate retirement period (years of retirement)
+        retirement_period = data.life_expectancy - data.retirement_age
+        if retirement_period <= 0:
+            retirement_period = 25  # Default fallback
         
-        # Calculate corpus needed (25 years of retirement assumed)
-        recommended_corpus = calculate_retirement_corpus(
-            data.monthly_expenses,
-            years_remaining,
-            data.inflation,
-            post_retirement_return
-        )
+        # Calculate required retirement corpus
+        # This corpus needs to last for retirement_period years
+        # providing inflation-adjusted withdrawals
+        
+        # Annual expenses at the START of retirement
+        inflated_monthly_expenses = data.monthly_expenses * pow(1 + data.inflation / 100, years_remaining)
+        annual_expenses_at_retirement = inflated_monthly_expenses * 12
+        
+        # Calculate corpus needed using perpetuity/annuity formula
+        # The corpus grows at retirement_kitty_returns% while expenses grow at post_retirement_inflation%
+        # We need to find present value (at retirement) of all future expenses
+        
+        corpus_needed = 0
+        for year in range(1, retirement_period + 1):
+            # Expenses in this year (growing with post-retirement inflation)
+            expense_this_year = annual_expenses_at_retirement * pow(1 + data.post_retirement_inflation / 100, year - 1)
+            # Present value of this expense (discounted at retirement kitty returns)
+            pv_expense = expense_this_year / pow(1 + data.retirement_kitty_returns / 100, year)
+            corpus_needed += pv_expense
+        
+        recommended_corpus = corpus_needed
         
         # Future value of existing investments
         future_value_existing = future_value_lumpsum(

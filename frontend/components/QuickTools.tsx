@@ -16,18 +16,21 @@ const QuickTools: React.FC = () => {
       label: 'SINGLE',
       subLabel: 'AMOUNT',
       icon: '💵',
+      description: 'Calculate lumpsum investment returns',
     },
     {
       id: 'irregular-cash-flow' as CalculatorType,
       label: 'IRREGULAR',
       subLabel: 'CASH FLOW',
       icon: '📊',
+      description: 'Calculate IRR/XIRR for irregular investments',
     },
     {
       id: 'weighted-returns' as CalculatorType,
       label: 'WEIGHTED AVG.',
       subLabel: 'RETURNS',
       icon: '⚖️',
+      description: 'Calculate portfolio weighted average return',
     },
   ];
 
@@ -39,6 +42,7 @@ const QuickTools: React.FC = () => {
           <button
             key={calc.id}
             onClick={() => setActiveCalculator(calc.id)}
+            title={calc.description}
             className={`flex-1 min-w-[200px] px-6 py-4 rounded-xl font-bold transition-all duration-300 ${
               activeCalculator === calc.id
                 ? 'bg-blue-500 text-white shadow-lg'
@@ -50,6 +54,9 @@ const QuickTools: React.FC = () => {
               <div className="text-left">
                 <div className="text-sm">{calc.label}</div>
                 <div className="text-base font-bold">{calc.subLabel}</div>
+                <div className={`text-xs mt-1 font-normal ${
+                  activeCalculator === calc.id ? 'text-blue-100' : 'text-gray-500'
+                }`}>{calc.description}</div>
               </div>
             </div>
           </button>

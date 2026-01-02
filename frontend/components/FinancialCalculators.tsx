@@ -17,24 +17,28 @@ const FinancialCalculators: React.FC = () => {
       label: 'SIP',
       subLabel: 'GROWTH',
       icon: '📈',
+      description: 'Calculate SIP returns and wealth creation',
     },
     {
       id: 'sip-need' as CalculatorType,
       label: 'SIP',
       subLabel: 'NEED',
       icon: '💰',
+      description: 'Find monthly SIP amount for your goal',
     },
     {
       id: 'sip-delay' as CalculatorType,
       label: 'SIP',
       subLabel: 'DELAY COST',
       icon: '⏰',
+      description: 'See the cost of delaying your SIP',
     },
     {
       id: 'swp' as CalculatorType,
       label: 'SWP',
       subLabel: 'CALCULATOR',
       icon: '💸',
+      description: 'Plan systematic withdrawal strategy',
     },
   ];
 
@@ -46,6 +50,7 @@ const FinancialCalculators: React.FC = () => {
           <button
             key={calc.id}
             onClick={() => setActiveCalculator(calc.id)}
+            title={calc.description}
             className={`flex-1 min-w-[200px] px-6 py-4 rounded-xl font-bold transition-all duration-300 ${
               activeCalculator === calc.id
                 ? 'bg-blue-500 text-white shadow-lg'
@@ -57,6 +62,9 @@ const FinancialCalculators: React.FC = () => {
               <div className="text-left">
                 <div className="text-sm">{calc.label}</div>
                 <div className="text-base font-bold">{calc.subLabel}</div>
+                <div className={`text-xs mt-1 font-normal ${
+                  activeCalculator === calc.id ? 'text-blue-100' : 'text-gray-500'
+                }`}>{calc.description}</div>
               </div>
             </div>
           </button>

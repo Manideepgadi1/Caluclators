@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import NumberInput from '../NumberInput';
 import SliderInput from '../SliderInput';
 import Dropdown from '../Dropdown';
@@ -18,6 +18,28 @@ const SIPGrowthCalculator: React.FC = () => {
 
   const [results, setResults] = useState<SIPGrowthOutput | null>(null);
   const [loading, setLoading] = useState(false);
+  
+  // Growth dropdown states
+  const [growthOpen, setGrowthOpen] = useState(false);
+  const [growthType, setGrowthType] = useState<'none' | 'percentage' | 'halfYearly' | 'yearly'>('none');
+  const [growthPercentage, setGrowthPercentage] = useState(2);
+  const [growthHalfYearly, setGrowthHalfYearly] = useState(1000);
+  const [growthYearly, setGrowthYearly] = useState(1000);
+
+  // Ref for click-outside detection
+  const growthRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (growthRef.current && !growthRef.current.contains(event.target as Node)) {
+        setGrowthOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const calculate = async (data: SIPGrowthInput) => {
     try {
@@ -75,17 +97,167 @@ const SIPGrowthCalculator: React.FC = () => {
           displayValue={`${inputs.expected_returns.toFixed(2)}%`}
         />
 
-        <Dropdown
-          label="Expected Growth in Savings"
-          value={inputs.growth_in_savings || 0}
-          onChange={(v) => updateInput('growth_in_savings', parseFloat(v))}
-          options={[
-            { label: '0 % Every Year', value: 0 },
-            { label: '5 % Every Year', value: 5 },
-            { label: '10 % Every Year', value: 10 },
-            { label: '15 % Every Year', value: 15 },
-          ]}
-        />
+        {/* Expected Growth in Savings Custom Dropdown */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Expected Growth in Savings
+          </label>
+          <div className="relative" ref={growthRef}>
+            <button
+              onClick={() => setGrowthOpen(!growthOpen)}
+              className="w-full px-4 py-3 text-left bg-white border-2 border-blue-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 flex justify-between items-center hover-lift"
+              aria-label="Select expected growth in savings"
+            >
+              <span className="text-blue-600 font-medium">
+                {growthType === 'none' ? 'No Growth' :
+                 growthType === 'percentage' ? `${growthPercentage}% Yearly` : 
+                 growthType === 'halfYearly' ? `₹${growthHalfYearly.toLocaleString('en-IN')} Half Yearly` :
+                 `₹${growthYearly.toLocaleString('en-IN')} Yearly`}
+              </span>
+              <svg className={`w-5 h-5 text-gray-600 transition-transform ${growthOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {growthOpen && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg animate-fadeIn">
+                <div className="p-3 space-y-3">
+                  {/* No Growth Option */}
+                  <div 
+                    onClick={() => {
+                      setGrowthType('none');
+                      updateInput('growth_in_savings', 0);
+                    }}
+                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                  >
+                    <div className="w-4 h-4 border-2 border-gray-400 rounded flex items-center justify-center">
+                      {growthType === 'none' && (
+                        <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                    <span className="text-sm text-gray-700 font-medium">No Growth (0%)</span>
+                  </div>
+
+                  {/* Percentage Option */}
+                  <div 
+                    onClick={() => {
+                      if (growthType === 'percentage') {
+                        setGrowthType('none');
+                        updateInput('growth_in_savings', 0);
+                      } else {
+                        setGrowthType('percentage');
+                        updateInput('growth_in_savings', growthPercentage);
+                      }
+                    }}
+                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                  >
+                    <div className="w-4 h-4 border-2 border-gray-400 rounded flex items-center justify-center">
+                      {growthType === 'percentage' && (
+                        <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                    <input
+                      type="number"
+                      value={growthPercentage}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        const value = parseFloat(e.target.value) || 0;
+                        setGrowthPercentage(value);
+                        setGrowthType('percentage');
+                        updateInput('growth_in_savings', value);
+                      }}
+                      className="w-20 px-3 py-1.5 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      aria-label="Percentage value"
+                      min="0"
+                      max="20"
+                      step="0.5"
+                    />
+                    <span className="text-sm text-gray-700">% Every Year</span>
+                  </div>
+
+                  {/* Half Yearly Option */}
+                  <div 
+                    onClick={() => {
+                      if (growthType === 'halfYearly') {
+                        setGrowthType('none');
+                        updateInput('growth_in_savings', 0);
+                      } else {
+                        setGrowthType('halfYearly');
+                        updateInput('growth_in_savings', 10);
+                      }
+                    }}
+                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                  >
+                    <div className="w-4 h-4 border-2 border-gray-400 rounded flex items-center justify-center">
+                      {growthType === 'halfYearly' && (
+                        <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                    <input
+                      type="number"
+                      value={growthHalfYearly}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 0;
+                        setGrowthHalfYearly(value);
+                        setGrowthType('halfYearly');
+                        updateInput('growth_in_savings', 10);
+                      }}
+                      className="w-28 px-3 py-1.5 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      aria-label="Half yearly amount"
+                      min="0"
+                      step="100"
+                    />
+                    <span className="text-sm text-gray-700">Half Yearly (₹)</span>
+                  </div>
+
+                  {/* Yearly Option */}
+                  <div 
+                    onClick={() => {
+                      if (growthType === 'yearly') {
+                        setGrowthType('none');
+                        updateInput('growth_in_savings', 0);
+                      } else {
+                        setGrowthType('yearly');
+                        updateInput('growth_in_savings', 15);
+                      }
+                    }}
+                    className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg cursor-pointer"
+                  >
+                    <div className="w-4 h-4 border-2 border-gray-400 rounded flex items-center justify-center">
+                      {growthType === 'yearly' && (
+                        <svg className="w-3 h-3 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </div>
+                    <input
+                      type="number"
+                      value={growthYearly}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 0;
+                        setGrowthYearly(value);
+                        setGrowthType('yearly');
+                        updateInput('growth_in_savings', 15);
+                      }}
+                      className="w-28 px-3 py-1.5 border border-gray-300 rounded-lg text-center focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      aria-label="Yearly amount"
+                      min="0"
+                      step="100"
+                    />
+                    <span className="text-sm text-gray-700">Yearly (₹)</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div>

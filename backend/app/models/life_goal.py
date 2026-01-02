@@ -14,6 +14,9 @@ class RetirementInput(BaseModel):
     inflation: float = Field(default=6.0, ge=0, le=20, description="Expected inflation %")
     growth_in_savings: float = Field(default=0, ge=0, le=20, description="Expected growth in savings %")
     existing_investments: float = Field(default=0, ge=0, description="Current retirement investments")
+    life_expectancy: int = Field(default=85, ge=60, le=120, description="Expected life expectancy")
+    retirement_kitty_returns: float = Field(default=8.0, ge=1, le=20, description="Returns on retirement kitty %")
+    post_retirement_inflation: float = Field(default=8.0, ge=0, le=20, description="Post-retirement inflation %")
 
 
 class RetirementOutput(BaseModel):
