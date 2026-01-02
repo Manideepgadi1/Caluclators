@@ -53,25 +53,35 @@ echo -e "${GREEN}✓ Code updated${NC}"
 
 # Rebuild frontend (Next.js)
 echo ""
-echo -e "${YELLOW}→ Building frontend (Next.js)...${NC}"
+echo -e "${YELLOW}→ Rebuilding frontend (Next.js)...${NC}"
 cd "$APP_DIR/frontend"
+rm -rf .next
 npm run build
 echo -e "${GREEN}✓ Frontend built${NC}"
 
-# Restart backend (uvicorn)
+# Stop old processes
 echo ""
-echo -e "${YELLOW}→ Restarting backend (uvicorn)...${NC}"
-pkill -f "uvicorn app.main:app" || true
-cd "$APP_DIR/backend"
-nohup venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 5003 > /dev/null 2>&1 &
-echo -e "${GREEN}✓ Backend restarted${NC}"
+echo -e "${YELLOW}→ Stopping old processes...${NC}"
+pm2 stop investment-calculator-backend investment-calculator-frontend 2>/dev/null || true
+pm2 delete investment-calculator-backend investment-calculator-frontend 2>/dev/null || true
+echo -e "${GREEN}✓ Old processes stopped${NC}"
 
-# Restart frontend (Next.js)
-echo -e "${YELLOW}→ Restarting frontend (Next.js)...${NC}"
-pkill -f "next start" || true
+# Start backend with PM2
+echo -e "${YELLOW}→ Starting backend (uvicorn)...${NC}"
+cd "$APP_DIR/backend"
+pm2 start "venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 5003" --name investment-calculator-backend
+echo -e "${GREEN}✓ Backend started${NC}"
+
+# Start frontend with PM2
+echo -e "${YELLOW}→ Starting frontend (Next.js)...${NC}"
 cd "$APP_DIR/frontend"
-nohup npm start > /dev/null 2>&1 &
-echo -e "${GREEN}✓ Frontend restarted${NC}"
+pm2 start npm --name investment-calculator-frontend -- start
+echo -e "${GREEN}✓ Frontend started${NC}"
+
+# Save PM2 configuration
+echo -e "${YELLOW}→ Saving PM2 configuration...${NC}"
+pm2 save
+echo -e "${GREEN}✓ PM2 configuration saved${NC}"
 
 # Wait for services to start
 sleep 3

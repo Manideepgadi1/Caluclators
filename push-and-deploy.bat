@@ -33,7 +33,7 @@ echo [2/2] Updating VPS...
 echo Connecting to 82.25.105.18...
 echo.
 
-ssh root@82.25.105.18 "cd /var/www/vsfintech/Investment-Calculator && git pull origin main && cd frontend && npm run build && cd .. && pkill -f 'uvicorn app.main:app' && pkill -f 'next start' && cd backend && nohup venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 5003 > /dev/null 2>&1 & cd ../frontend && nohup npm start > /dev/null 2>&1 & sleep 3 && echo 'Services restarted!' && ps aux | grep -E 'uvicorn|next start' | grep -v grep"
+ssh root@82.25.105.18 "cd /var/www/vsfintech/Investment-Calculator && git pull origin main && cd frontend && rm -rf .next && npm run build && cd .. && pm2 stop investment-calculator-backend investment-calculator-frontend || true && pm2 delete investment-calculator-backend investment-calculator-frontend || true && cd backend && pm2 start 'venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 5003' --name investment-calculator-backend && cd ../frontend && pm2 start npm --name investment-calculator-frontend -- start && pm2 save && sleep 2 && pm2 list"
 
 if errorlevel 1 (
     echo.
